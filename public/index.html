@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Notes App</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; background-color: #f9f9f9; }
+        .note-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input, textarea, button { padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #007BFF; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #0056b3; }
+        .note-card { background: white; border-left: 5px solid #007BFF; padding: 15px; margin-bottom: 15px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .note-card h3 { margin: 0 0 10px 0; color: #333; }
+        .note-card p { margin: 0 0 10px 0; color: #666; }
+        .note-card small { color: #999; }
+    </style>
+</head>
+<body>
+
+    <h2>Notebook</h2>
+    
+    <div class="note-form">
+        <input type="text" id="noteTitle" placeholder="Note Title">
+        <textarea id="noteContent" placeholder="Write your note here..." rows="4"></textarea>
+        <button id="saveBtn">Save Note</button>
+    </div>
+
+    <div id="notesContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
