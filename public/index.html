@@ -3,30 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quick Notes App</title>
+    <title>Webcomic Library Tracker</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; background-color: #f9f9f9; }
-        .note-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        input, textarea, button { padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
-        button { background-color: #007BFF; color: white; border: none; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #0056b3; }
-        .note-card { background: white; border-left: 5px solid #007BFF; padding: 15px; margin-bottom: 15px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .note-card h3 { margin: 0 0 10px 0; color: #333; }
-        .note-card p { margin: 0 0 10px 0; color: #666; }
-        .note-card small { color: #999; }
+        :root {
+            --bg-color: #121824;
+            --card-color: #1e293b;
+            --accent-color: #10b981;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 { color: var(--accent-color); }
+        
+        /* Form Styling */
+        form {
+            background-color: var(--card-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group.full-width { grid-column: span 2; }
+        label { margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.9rem; }
+        input, select {
+            padding: 0.6rem;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            color: white;
+            border-radius: 4px;
+        }
+        button {
+            grid-column: span 2;
+            padding: 0.75rem;
+            background-color: var(--accent-color);
+            color: #0f172a;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover { opacity: 0.9; }
+
+        /* Grid & Card Styling */
+        .comic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .comic-card {
+            background-color: var(--card-color);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+        }
+        .comic-cover {
+            height: 200px;
+            background-color: #0f172a;
+            object-fit: cover;
+            width: 100%;
+        }
+        .comic-info { padding: 1rem; flex-grow: 1; }
+        .comic-title { font-size: 1.2rem; font-weight: bold; margin: 0 0 0.5rem 0; }
+        .comic-platform {
+            display: inline-block;
+            background-color: #334155;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        
+        /* Progress Bar */
+        .progress-container { margin-top: auto; }
+        .progress-text { font-size: 0.85rem; color: var(--text-muted); display: flex; justify-content: space-between; margin-bottom: 0.25rem; }
+        .progress-bar-bg { background-color: #0f172a; height: 8px; border-radius: 4px; overflow: hidden; }
+        .progress-bar-fill { background-color: var(--accent-color); height: 100%; width: 0%; transition: width 0.3s ease; }
+
+        /* Card Action Buttons (NEW) */
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .btn-action {
+            flex: 1;
+            padding: 0.4rem;
+            font-size: 0.85rem;
+            font-weight: normal;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .btn-progress {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn-delete {
+            background-color: #ef4444;
+            color: white;
+            max-width: 70px;
+        }
+        .btn-action:hover { opacity: 0.85; }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1> My Webcomic Library</h1>
+        
+        <form id="comicForm">
+            <div class="form-group full-width">
+                <label for="title">Webcomic Title *</label>
+                <input type="text" id="title" required placeholder="e.g. Solo Leveling, Greatest Estate Developer">
+            </div>
+            <div class="form-group">
+                <label for="platform">Platform / Host</label>
+                <select id="platform">
+                    <option value="Asura Scans">Asura Scans</option>
+                    <option value="Flame Comics">Flame Comics</option>
+                    <option value="Webtoon">Webtoon</option>
+                    <option value="Tapas">Tapas</option>
+                    <option value="Independent">Independent Site</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="cover_image_url">Cover Image URL</label>
+                <input type="url" id="cover_image_url" placeholder="https://example.com/cover.jpg">
+            </div>
+            <div class="form-group">
+                <label for="chapters_available">Total Chapters Available</label>
+                <input type="number" id="chapters_available" min="0" value="0">
+            </div>
+            <div class="form-group">
+                <label for="chapters_read">Chapters Read</label>
+                <input type="number" id="chapters_read" min="0" value="0">
+            </div>
+            <button type="submit">Add Webcomic to Library</button>
+        </form>
 
-    <h2>Notebook</h2>
-    
-    <div class="note-form">
-        <input type="text" id="noteTitle" placeholder="Note Title">
-        <textarea id="noteContent" placeholder="Write your note here..." rows="4"></textarea>
-        <button id="saveBtn">Save Note</button>
+        <div class="comic-grid" id="comicGrid"></div>
     </div>
-
-    <div id="notesContainer"></div>
 
     <script src="app.js"></script>
 </body>

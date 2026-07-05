@@ -8,7 +8,8 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(express.json()); // Allows the server to read JSON data sent from the frontend
+app.use(express.json());           // Allows the server to read JSON data sent from the frontend
+app.use(express.static('public')); // Serves index.html and app.js automatically on port 3000
 
 // Create a MySQL Connection Pool (efficient way to handle multiple requests)
 const db = mysql.createPool({
@@ -21,33 +22,91 @@ const db = mysql.createPool({
     queueLimit: 0
 });
 
-// 1. READ Endpoint - Fetch all notes from database
-app.get('/api/notes', (req, res) => {
-    db.query('SELECT * FROM notes ORDER BY created_at DESC', (err, results) => {
+// 1. READ Endpoint - Get all webcomics in the library
+app.get('/api/webcomics', (req, res) => {
+    const sql = 'SELECT * FROM webcomics ORDER BY created_at DESC';
+    
+    db.query(sql, (err, results) => {
         if (err) {
-            console.error('Database error fetching notes:', err);
-            return res.status(500).json({ error: 'Database error fetching notes' });
+            console.error('Database error fetching webcomics:', err);
+            return res.status(500).json({ error: 'Failed to fetch webcomics' });
         }
         res.json(results);
     });
 });
 
-// 2. WRITE Endpoint - Save a new note to the database
-app.post('/api/notes', (req, res) => {
-    const { title, content } = req.body;
-    
+// 2. CREATE Endpoint - Log a new webcomic
+app.post('/api/webcomics', (req, res) => {
+    const { title, chapters_available, chapters_read, platform, cover_image_url } = req.body;
+
+    // Validation: Title is still our only strictly required field
     if (!title) {
-        return res.status(400).json({ error: 'Title is required' });
+        return res.status(400).json({ error: 'Webcomic title is required' });
     }
 
-    // Using '?' placeholders prevents SQL injection attacks
-    const sql = 'INSERT INTO notes (title, content) VALUES (?, ?)';
-    db.query(sql, [title, content], (err, result) => {
+    const sql = `
+        INSERT INTO webcomics (title, chapters_available, chapters_read, platform, cover_image_url) 
+        VALUES (?, ?, ?, ?, ?)
+    `;
+    
+    const values = [
+        title, 
+        chapters_available || 0, 
+        chapters_read || 0, 
+        platform || 'Independent', 
+        cover_image_url || null
+    ];
+
+    db.query(sql, values, (err, result) => {
         if (err) {
-            console.error('Database error saving note:', err);
-            return res.status(500).json({ error: 'Database error saving note' });
+            console.error('Database error inserting webcomic:', err);
+            return res.status(500).json({ error: 'Failed to save webcomic' });
         }
-        res.status(201).json({ id: result.insertId, title, content });
+        
+        res.status(201).json({ 
+            id: result.insertId, 
+            title, 
+            chapters_available, 
+            chapters_read, 
+            platform, 
+            cover_image_url 
+        });
+    });
+});
+
+// 3. UPDATE Endpoint - Update reading progress by ID
+app.put('/api/webcomics/:id', (req, res) => {
+    const { id } = req.params;
+    const { chapters_read, chapters_available } = req.body;
+
+    const sql = 'UPDATE webcomics SET chapters_read = ?, chapters_available = ? WHERE id = ?';
+    
+    db.query(sql, [chapters_read, chapters_available, id], (err, result) => {
+        if (err) {
+            console.error('Database error updating webcomic:', err);
+            return res.status(500).json({ error: 'Failed to update progress' });
+        }
+        
+        res.json({ message: 'Progress updated successfully' });
+    });
+});
+
+// 4. DELETE Endpoint - Remove a webcomic from the database by ID
+app.delete('/api/webcomics/:id', (req, res) => {
+    const { id } = req.params;
+    const sql = 'DELETE FROM webcomics WHERE id = ?';
+
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error('Database error deleting webcomic:', err);
+            return res.status(500).json({ error: 'Failed to delete webcomic' });
+        }
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Webcomic not found' });
+        }
+        
+        res.json({ message: 'Webcomic successfully deleted' });
     });
 });
 
