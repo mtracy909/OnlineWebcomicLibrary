@@ -4,128 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Webcomic Library Tracker</title>
-    <style>
-        :root {
-            --bg-color: #121824;
-            --card-color: #1e293b;
-            --accent-color: #10b981;
-            --text-color: #f8fafc;
-            --text-muted: #94a3b8;
-        }
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 2rem;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        h1 { color: var(--accent-color); }
-        
-        /* Form Styling */
-        form {
-            background-color: var(--card-color);
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-        .form-group { display: flex; flex-direction: column; }
-        .form-group.full-width { grid-column: span 2; }
-        label { margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.9rem; }
-        input, select {
-            padding: 0.6rem;
-            background-color: #0f172a;
-            border: 1px solid #334155;
-            color: white;
-            border-radius: 4px;
-        }
-        button {
-            grid-column: span 2;
-            padding: 0.75rem;
-            background-color: var(--accent-color);
-            color: #0f172a;
-            font-weight: bold;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover { opacity: 0.9; }
-
-        /* Grid & Card Styling */
-        .comic-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
-        }
-        .comic-card {
-            background-color: var(--card-color);
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #334155;
-            display: flex;
-            flex-direction: column;
-        }
-        .comic-cover {
-            height: 200px;
-            background-color: #0f172a;
-            object-fit: cover;
-            width: 100%;
-        }
-        .comic-info { padding: 1rem; flex-grow: 1; }
-        .comic-title { font-size: 1.2rem; font-weight: bold; margin: 0 0 0.5rem 0; }
-        .comic-platform {
-            display: inline-block;
-            background-color: #334155;
-            font-size: 0.75rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-        }
-        
-        /* Progress Bar */
-        .progress-container { margin-top: auto; }
-        .progress-text { font-size: 0.85rem; color: var(--text-muted); display: flex; justify-content: space-between; margin-bottom: 0.25rem; }
-        .progress-bar-bg { background-color: #0f172a; height: 8px; border-radius: 4px; overflow: hidden; }
-        .progress-bar-fill { background-color: var(--accent-color); height: 100%; width: 0%; transition: width 0.3s ease; }
-
-        /* Card Action Buttons (NEW) */
-        .card-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-        .btn-action {
-            flex: 1;
-            padding: 0.4rem;
-            font-size: 0.85rem;
-            font-weight: normal;
-            border-radius: 4px;
-            cursor: pointer;
-            text-align: center;
-        }
-        .btn-progress {
-            background-color: #3b82f6;
-            color: white;
-        }
-        .btn-delete {
-            background-color: #ef4444;
-            color: white;
-            max-width: 70px;
-        }
-        .btn-action:hover { opacity: 0.85; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h1> My Webcomic Library</h1>
-        
+        <h1> My Webcomic Library</h1> 
         <form id="comicForm">
+            <div class="scrape-wrapper" style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                <input type="url" id="scrapeUrlInput" placeholder="Paste comic URL here to autofill..." style="flex-grow: 1;">
+                <button type="button" id="scrapeBtn" style="flex-shrink: 0; width: 100px;">Scrape</button>
+            </div>
             <div class="form-group full-width">
                 <label for="title">Webcomic Title *</label>
                 <input type="text" id="title" required placeholder="e.g. Solo Leveling, Greatest Estate Developer">
@@ -136,7 +24,7 @@
                     <option value="Asura Scans">Asura Scans</option>
                     <option value="Flame Comics">Flame Comics</option>
                     <option value="Webtoon">Webtoon</option>
-                    <option value="Tapas">Tapas</option>
+                    <option value="Toonily">Toonily</option>
                     <option value="Independent">Independent Site</option>
                 </select>
             </div>
@@ -154,7 +42,17 @@
             </div>
             <button type="submit">Add Webcomic to Library</button>
         </form>
-
+        <div class="filters" style="margin-bottom: 1rem;">
+            <select id="platformFilter" style="padding: 0.5rem; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 4px;">
+                <option value="All">All Platforms</option>
+                <option value="Asura Scans">Asura Scans</option>
+                <option value="Flame Comics">Flame Comics</option>
+                <option value="Webtoon">Webtoon</option>
+                <option value="Toonily">Toonily</option>
+                <option value="Independent">Independent Site</option>
+            </select>
+        </div>
+<div class="comic-grid" id="comicGrid"></div>
         <div class="comic-grid" id="comicGrid"></div>
     </div>
 

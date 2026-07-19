@@ -2,6 +2,8 @@ require('dotenv').config(); // Loads environment variables from your .env file
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
+const axios = require('axios');
+const cheerio = require('cheerio');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -77,17 +79,15 @@ app.post('/api/webcomics', (req, res) => {
 // 3. UPDATE Endpoint - Update reading progress by ID
 app.put('/api/webcomics/:id', (req, res) => {
     const { id } = req.params;
-    const { chapters_read, chapters_available } = req.body;
-
-    const sql = 'UPDATE webcomics SET chapters_read = ?, chapters_available = ? WHERE id = ?';
+    const { title, chapters_read, chapters_available, platform, cover_image_url } = req.body;
+    const sql = 'UPDATE webcomics SET title = ?, chapters_read = ?, chapters_available = ?, platform = ?, cover_image_url = ? WHERE id = ?';
     
-    db.query(sql, [chapters_read, chapters_available, id], (err, result) => {
+    db.query(sql, [title, chapters_read, chapters_available, platform, cover_image_url, id], (err, result) => {
         if (err) {
             console.error('Database error updating webcomic:', err);
             return res.status(500).json({ error: 'Failed to update progress' });
         }
-        
-        res.json({ message: 'Progress updated successfully' });
+        res.json({ message: 'Comic updated successfully' });
     });
 });
 
@@ -108,6 +108,24 @@ app.delete('/api/webcomics/:id', (req, res) => {
         
         res.json({ message: 'Webcomic successfully deleted' });
     });
+});
+
+app.post('/api/scrape', async (req, res) => {
+    const { url } = req.body;
+    try {
+        const { data } = await axios.get(url);
+        const $ = cheerio.load(data);
+
+        // Extract Title (OG tag or standard title tag)
+        const title = $('meta[property="og:title"]').attr('content') || $('title').text();
+        // Extract Image (OG image tag)
+        const image = $('meta[property="og:image"]').attr('content');
+
+        res.json({ title, cover_image_url: image });
+    } catch (error) {
+        console.error('Scraping error:', error);
+        res.status(500).json({ error: 'Failed to scrape this URL' });
+    }
 });
 
 // Start the server
